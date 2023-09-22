@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 @RestController
 @CrossOrigin
 public class StudentRestController {
@@ -33,19 +32,23 @@ public class StudentRestController {
 
     @PostMapping("/student")
     @ResponseStatus(HttpStatus.CREATED)
-    public Student postStudent(@RequestBody Student student){
+    public StudentDTO postStudent(@RequestBody StudentDTO studentDTO){
+        Student student = studentConverter.toEntity(studentDTO); // convert DTO to entity
+        student.setId(0); // to ensure that we create a new student
+        studentRepository.save(student);
         System.out.println(student);
-        return studentRepository.save(student);
+        return studentConverter.toDTO(student); // convert entity to DTO
     }
 
     @PutMapping("/student/{id}")
-    public ResponseEntity<Student> putStudent(@RequestBody Student student, @PathVariable("id") int id){
+    public ResponseEntity<StudentDTO> putStudent(@RequestBody StudentDTO studentDTO, @PathVariable("id") int id){
         Optional<Student> optionalStudent = studentRepository.findById(id);
         if (optionalStudent.isPresent()){
+            Student student = studentConverter.toEntity(studentDTO);
             student.setId(id);
             studentRepository.save(student);
             //return new ResponseEntity<>(student, HttpStatus.OK);
-            return ResponseEntity.ok(student);
+            return ResponseEntity.ok(studentConverter.toDTO(student));
         } else {
             //return new ResponseEntity<>(new Student(), HttpStatus.NOT_FOUND);
             return ResponseEntity.notFound().build();
@@ -66,5 +69,15 @@ public class StudentRestController {
     @GetMapping("/students/{name}")
     public List<Student> getStudentsByName(@PathVariable String name){
         return studentRepository.findAllByName(name);
+    }
+
+    @GetMapping("/student/{id}")
+    public ResponseEntity<StudentDTO> getStudentById(@PathVariable("id") int id){
+        Optional<Student> optionalStudent = studentRepository.findById(id);
+        if (optionalStudent.isPresent()){
+            return ResponseEntity.ok(studentConverter.toDTO(optionalStudent.get())); // convert entity to DTO
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
