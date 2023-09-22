@@ -1,5 +1,7 @@
 package dk.kea.jpastudent.controller;
 
+import dk.kea.jpastudent.dto.StudentConverter;
+import dk.kea.jpastudent.dto.StudentDTO;
 import dk.kea.jpastudent.model.Student;
 import dk.kea.jpastudent.repositories.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,9 +19,16 @@ public class StudentRestController {
     @Autowired
     StudentRepository studentRepository;
 
+    @Autowired
+    StudentConverter studentConverter;
+
     @GetMapping("/students")
-    public List<Student> students() {
-        return studentRepository.findAll();
+    public List<StudentDTO> students() {
+        List<Student> students = studentRepository.findAll();
+        List<StudentDTO> studentDTOS = new ArrayList<>();
+
+        students.forEach(s -> studentDTOS.add(studentConverter.toDTO(s)));
+        return studentDTOS;
     }
 
     @PostMapping("/student")
