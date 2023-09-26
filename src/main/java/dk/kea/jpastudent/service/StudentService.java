@@ -60,4 +60,13 @@ public class StudentService {
             throw new StudentNotFoundException("Student not found with id: " + id);
         }
     }
+
+    public void deleteStudentById(int id){
+        Optional<Student> student = studentRepository.findById(id);
+        if (student.isPresent()){
+            studentRepository.deleteById(id);
+        } else {
+            throw new StudentNotFoundException("Student not found with id: " + id);
+        }
+    }
 }
